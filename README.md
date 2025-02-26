@@ -5,3 +5,4 @@ The group is composed by:
 
 Edoardo Beccari (67990@novasbe.pt) \
 Bernardo Arcão (68204@novasbe.pt)
+Ricardo Ferreira (39175@novasbe.pt)
