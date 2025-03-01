@@ -55,6 +55,26 @@ class MovieAnalysis:
     def _load_data(self, file_path, column_names):
         """Load data from a file into a pandas DataFrame."""
         return pd.read_csv(file_path, sep='\t', header=None, names=column_names)
+    
+    def movie_type(self, N: int = 10):
+        """
+        comments
+        """
+        pass
+    
+    def actor_count(self):
+        """
+        comments
+        """
+        pass
+    
+    def actor_distributions(self, gender: str, max_height: float, min_height: float, plot: bool = False):
+        """
+        comments
+        """
+        pass
+    
+    
         
 if __name__ == '__main__':       
     test = MovieAnalysis()
