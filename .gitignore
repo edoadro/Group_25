@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Folders with data too heavy to be stored in Git
+MovieData/
+Testing/MovieData/
+.vscode/
