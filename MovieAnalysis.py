@@ -2,6 +2,7 @@ import os
 import tarfile
 import urllib.request
 import pandas as pd
+import ast
 
 class MovieAnalysis:
     """
@@ -61,7 +62,12 @@ class MovieAnalysis:
         This function is used to find the top 'N' most common movie types.
         It returns a DataFrame with the movie type and the number of movies of that type. 
         """
-        pass
+        # Uses ast to convert the string to a dictionary
+        movies = self.movie_data.copy()
+        movies['Movie genres'] = movies['Movie genres'].apply(lambda x: list(ast.literal_eval(x).values()))
+        genre_counts = movies.explode('Movie genres')['Movie genres'].value_counts()
+        
+        return genre_counts.head(N)
     
     def actor_count(self):
         """
