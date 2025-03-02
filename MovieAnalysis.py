@@ -65,18 +65,31 @@ class MovieAnalysis:
         if not isinstance(N, int):
             raise ValueError("N must be an integer")
         
-        # Uses ast to convert the string to a dictionary
         movies = self.movie_data.copy()
+        
+        # Uses ast to convert the string to a dictionary then converts the dictionary to a list wth lambda func
         movies['Movie genres'] = movies['Movie genres'].apply(lambda x: list(ast.literal_eval(x).values()))
+        
+        # explodes splits the list into separate rows and then value counts counts the number of each genre
         genre_counts = movies.explode('Movie genres')['Movie genres'].value_counts()
+        
         
         return genre_counts.head(N)
     
     def actor_count(self):
         """
-        comments
+        This function returns a pandas dataframe with a histogram of "number of actors" vs "movie counts".
         """
-        pass
+        
+        character_data = self.character_data.copy()
+        
+        # group by movies ID to get actor count
+        actors_per_movie = character_data.groupby('Freebase movie ID').agg(actor_count = ('Freebase actor ID', 'count')).reset_index()
+
+        # group by actor count to get movie count and sort by actor count
+        movie_count = actors_per_movie.groupby('actor_count').agg(movie_count = ('Freebase movie ID', 'count')).sort_values('actor_count', ascending=True).reset_index()
+    
+        return movie_count
     
     def actor_distributions(self, gender: str, max_height: float, min_height: float, plot: bool = False):
         """
@@ -89,5 +102,5 @@ class MovieAnalysis:
 if __name__ == '__main__':       
     test = MovieAnalysis()
     
-    print(test.movie_type(25.5))
+    print(test.actor_count())
     
