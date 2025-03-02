@@ -62,6 +62,9 @@ class MovieAnalysis:
         This function is used to find the top 'N' most common movie types.
         It returns a DataFrame with the movie type and the number of movies of that type. 
         """
+        if not isinstance(N, int):
+            raise ValueError("N must be an integer")
+        
         # Uses ast to convert the string to a dictionary
         movies = self.movie_data.copy()
         movies['Movie genres'] = movies['Movie genres'].apply(lambda x: list(ast.literal_eval(x).values()))
@@ -85,4 +88,6 @@ class MovieAnalysis:
         
 if __name__ == '__main__':       
     test = MovieAnalysis()
+    
+    print(test.movie_type(25.5))
     
