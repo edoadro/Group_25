@@ -2,6 +2,7 @@ import os
 import tarfile
 import urllib.request
 import pandas as pd
+import matplotlib.pyplot as plt
 import ast
 
 class MovieAnalysis:
@@ -93,14 +94,74 @@ class MovieAnalysis:
     
     def actor_distributions(self, gender: str, max_height: float, min_height: float, plot: bool = False):
         """
-        comments
+        Analyzes the height distribution of actors based on gender and height range.
+
+    Parameters:
+    -----------
+    gender : str
+        The gender of the actors to include in the analysis. 
+        Accepts "All" or any distinct non-missing value in the dataset.
+    max_height : float
+        The upper limit for actor height in the analysis.
+    min_height : float
+        The lower limit for actor height in the analysis.
+    plot : bool, optional (default=False)
+        If True, generates a histogram of the height distribution using matplotlib.
+        
+    Example:
+    --------  
+    self.actor_distributions(gender = 'M', max_height = 200, min_height = 150, plot = True)
+    will return a plot of the height distribution for male actors with heights between 150 and 200 cm.
+
+    Returns:
+    --------
+    pd.DataFrame
+        A DataFrame containing summary statistics of the height distribution.
+
+    Raises:
+    -------
+    TypeError
+        If `gender` is not a string or if `max_height`/`min_height` are not numerical values.
+    ValueError
+        If `min_height` is greater than `max_height`.
         """
-        pass
-    
-    
+        
+        # Copy the data and get unique gender values
+        character_data = self.character_data.copy()
+        unique_genders = character_data['Actor gender'].dropna().unique().tolist()
+        
+        # check arguments types 
+        if not isinstance(gender, str):
+            raise TypeError("'gender' must be a string.")
+        if not isinstance(max_height, (int, float)):
+            raise TypeError("'max_height' must be a numerical value.")
+        if not isinstance(min_height, (int, float)):   
+            raise TypeError("'min_height' must be a numerical value.")
+        if not isinstance(plot, bool):
+            raise TypeError("'plot' must be a boolean (True/False).")
+        
+        #check arguments values
+        if min_height > max_height:
+            raise ValueError("'min_height' must be less than 'max_height'.")
+        if not (gender in unique_genders or gender == 'All'):
+            raise ValueError(f"'gender' must be either one of the non values in the dataframe or 'All'.")
+        
+        # filter the data based on parameters values
+        # height range
+        character_data = character_data[(character_data['Actor height'] >= min_height) & (character_data['Actor height'] <= max_height)]  
+        
+        # gender
+        if not gender == 'All':
+            character_data = character_data[character_data['Actor gender'] == gender]
+        
+        # plot the histogram
+        if plot:
+            character_data['Actor height'].plot(kind='hist', bins=100)
+            plt.show()
+        
         
 if __name__ == '__main__':       
     test = MovieAnalysis()
     
-    print(test.actor_count())
+    print(test.actor_distributions(gender = 'M', max_height = 300, min_height = 100, plot = True))
     
