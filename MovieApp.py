@@ -7,7 +7,12 @@ import matplotlib.pyplot as plt
 # Initialize the MovieAnalysis instance
 analysis = MovieAnalysis()
 
-st.title("Movie Data Analysis")
+st.title("Movie Data Analysis - Group_25")
+st.markdown(
+    "This app provides an analysis of the movie dataset.[this link](http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz)."
+)
+st.markdown("The dataset contains information about movies, characters, and actors. The analysis includes histograms for movie types, actor counts per movie, and actor heights.")
+
 
 # 1. Histogram for movie types
 st.header("Movie Types Histogram")
