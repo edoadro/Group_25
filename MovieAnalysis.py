@@ -106,9 +106,9 @@ class MovieAnalysis:
             The gender of the actors to include in the analysis.
             Accepts "All" or any distinct non-missing value in the dataset.
         max_height : float
-            The upper limit for actor height in the analysis.
+            The upper limit for actor height in the analysis. The value should passed in meters (1.95).
         min_height : float
-            The lower limit for actor height in the analysis.
+            The lower limit for actor height in the analysis. The value should passed in meters (1.95).
         plot : bool, optional (default=False)
             If True, generates a histogram of the height distribution using matplotlib.
 
@@ -130,6 +130,9 @@ class MovieAnalysis:
 
         # Convert height to numeric (to handle missing or incorrect values)
         character_data['Actor height'] = pd.to_numeric(character_data['Actor height'], errors='coerce')
+        
+        #convert 180 and 510 to 1.8 and 1.78 these are the only two values that are not in meters
+        character_data['Actor height'] = character_data['Actor height'].replace({180: 1.8, 510: 1.78})
 
         # Get unique gender values
         unique_genders = character_data['Actor gender'].dropna().unique().tolist()
@@ -166,7 +169,7 @@ class MovieAnalysis:
         # Plot the histogram
         if plot:
             plt.hist(filtered_data['Actor height'], bins=30, edgecolor='black')
-            plt.xlabel('Height (cm)')
+            plt.xlabel('Height (m)')
             plt.ylabel('Frequency')
             plt.title(f'Actor Height Distribution ({gender})')
             plt.show()
@@ -176,5 +179,5 @@ class MovieAnalysis:
 if __name__ == '__main__':
     test = MovieAnalysis()
 
-    print(test.actor_distributions(gender='M', max_height=300, min_height=100, plot=True))
+    print(test.actor_distributions(gender='All', max_height=2.2, min_height=1, plot=True))
     
