@@ -15,7 +15,7 @@ class MovieAnalysis:
     def __init__(self):
         download_link = 'http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz'
         download_path = 'MovieSummaries.tar.gz'
-        extract_path = '/Users/tancredidigrande/Downloads/MovieSummaries'
+        extract_path = 'Downloads/MovieSummaries'
 
 
         # Check if the directory is empty or doesn't exist
@@ -23,22 +23,22 @@ class MovieAnalysis:
             self._download_and_extract(download_link, download_path, extract_path)
 
         # Data and MetaData
-        self.movie_summaries = self._load_data('/Users/tancredidigrande/Downloads/MovieSummaries/plot_summaries.txt',
+        self.movie_summaries = self._load_data('Downloads/MovieSummaries/plot_summaries.txt',
                                                ['Wikipedia movie ID', 'Plot summary'])
-        self.character_data = self._load_data('/Users/tancredidigrande/Downloads/MovieSummaries/character.metadata.tsv',
+        self.character_data = self._load_data('Downloads/MovieSummaries/character.metadata.tsv',
                                               ['Wikipedia movie ID', 'Freebase movie ID', 'Movie release date',
                                                'Character name', 'Actor date of birth', 'Actor gender', 'Actor height',
                                                'Actor ethnicity', 'Actor name', 'Actor age at movie release',
                                                'Freebase character/actor map ID', 'Freebase character ID',
                                                'Freebase actor ID'])
-        self.movie_data = self._load_data('/Users/tancredidigrande/Downloads/MovieSummaries/movie.metadata.tsv',
+        self.movie_data = self._load_data('Downloads/MovieSummaries/movie.metadata.tsv',
                                           ['Wikipedia movie ID', 'Freebase movie ID', 'Movie name',
                                            'Movie release date', 'Movie box office revenue', 'Movie runtime',
                                            'Movie languages', 'Movie countries', 'Movie genres'])
         # Test Data
-        self.tvtropes_clusters = self._load_data('/Users/tancredidigrande/Downloads/MovieSummaries/tvtropes.clusters.txt',
+        self.tvtropes_clusters = self._load_data('Downloads/MovieSummaries/tvtropes.clusters.txt',
                                                  ['Character type', 'Freebase character/actor map ID'])
-        self.name_clusters = self._load_data('/Users/tancredidigrande/Downloads/MovieSummaries/name.clusters.txt',
+        self.name_clusters = self._load_data('Downloads/MovieSummaries/name.clusters.txt',
                                              ['Character name', 'Freebase character/actor map ID'])
 
     def _download_and_extract(self, download_link, download_path, extract_path):
