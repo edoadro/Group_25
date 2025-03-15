@@ -7,6 +7,23 @@ import matplotlib.pyplot as plt
 import ast
 import random
 
+import re
+
+
+# Function to detect the date format
+# This function will take a date string as input and return the format of the date string.
+def detect_date_format(date_str):
+    patterns = [
+        (r'\d{4}-\d{2}-\d{2}', '%Y-%m-%d'),  # 2024-03-15
+        (r'^\d{4}-\d{2}$', '%Y-%m'),  # 2024-03
+        (r'^\d{4}$', '%Y'),  # 2024
+    ] # these are the only patterns present in the data, jupyter notebook was used to find these patterns
+    
+    for pattern, fmt in patterns:
+        if re.match(pattern, date_str):
+            return fmt
+    return 'Unknown Format'
+
 
 class MovieAnalysis:
     """
@@ -239,35 +256,21 @@ class MovieAnalysis:
         # Copy the data
         actors = self.character_data.copy()
 
-        # Remove NaN values in 'Actor date of birth'
+        # Conversion to datetime
         actors = actors.dropna(subset=['Actor date of birth'])
 
-        # Ensure all values are strings before conversion
-        actors['Actor date of birth'] = actors['Actor date of birth'].astype(str)
-
-        # Detect entries that contain only a year (e.g., "1994")
-        actors['is_year_only'] = actors['Actor date of birth'].str.match(r'^\d{4}$') #4 digit
-
-        # Convert full dates normally
-        actors.loc[~actors['is_year_only'], 'Actor date of birth'] = pd.to_datetime(
-            actors.loc[~actors['is_year_only'], 'Actor date of birth'], errors='coerce'
+        # detect the date format (datetime directives) using detect_date_format function
+        actors['date_format'] = actors['Actor date of birth'].astype('str').apply(detect_date_format)
+        
+        # filter out the '%Y' format as it does not match the granularity 
+        actors = actors[actors['date_format'] != '%Y']
+        
+        # convert the date of birth to datetime
+        actors['Actor date of birth'] = actors.apply(
+            lambda row: pd.to_datetime(row['Actor date of birth'], format=row['date_format'], errors='coerce'),
+            axis=1
         )
-
-        # Convert year-only values to "YYYY-01-01" (January 1st of that year)
-        actors.loc[actors['is_year_only'], 'Actor date of birth'] = pd.to_datetime(
-            actors.loc[actors['is_year_only'], 'Actor date of birth'] + "-01-01", errors='coerce'
-        )
-
-        # Drop any remaining NaN values
-        actors = actors.dropna(subset=['Actor date of birth'])
-
-        # ✅ Fix timezone-aware timestamps by forcing conversion
-        if actors['Actor date of birth'].dtype == 'datetime64[ns, UTC]':
-            actors['Actor date of birth'] = actors['Actor date of birth'].dt.tz_convert(None)
-        elif actors['Actor date of birth'].dtype == 'object':
-            actors['Actor date of birth'] = pd.to_datetime(actors['Actor date of birth'], errors='coerce', utc=True)
-            actors['Actor date of birth'] = actors['Actor date of birth'].dt.tz_convert(None)
-
+        
         # Extract year and month
         actors['Year'] = actors['Actor date of birth'].dt.year
         actors['Month'] = actors['Actor date of birth'].dt.month
