@@ -9,7 +9,7 @@ Ricardo Ferreira (39175@novasbe.pt) \
 Tancredi Di Grande (61700@novasbe.pt)
 
 
-# Local LLM Integration (Phase 2)
+## Local LLM Integration (Phase 2)
 In the third page of the Streamlit app, we implemented a Local LLM-based movie genre classification pipeline. This was achieved using Ollama with the lightweight Mistral model.
 
 Features:
@@ -23,14 +23,14 @@ To use this feature, you need to have Ollama installed locally with the desired 
 
 On the Powershell execute the following commands:
 
-## Install Ollama (Windows):
+### Install Ollama (Windows):
 winget install Ollama.Ollama
-## Mac...
-## Run Ollama locally:
+### Mac...
+### Run Ollama locally:
 ollama serve
-## Pull the Mistral model (or any other supported model):
+### Pull the Mistral model (or any other supported model):
 ollama pull mistral
-## After all dependencies are installed and Ollama is running, start the Streamlit app:
+### After all dependencies are installed and Ollama is running, start the Streamlit app:
 streamlit run MovieApp.py
 
 
