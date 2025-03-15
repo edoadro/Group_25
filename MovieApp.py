@@ -163,37 +163,4 @@ elif page == "Chronological Info":
         st.pyplot(fig5)
 
 
-elif page == "AI Classification":
-    st.title("🤖 AI-Based Movie Genre Classification")
-
-    # Button to shuffle a movie
-    if st.button("🔀 Shuffle Movie"):
-        movie = analysis.get_random_movie()
-
-        # Display movie details
-        st.subheader("📖 Movie Title & Summary")
-        st.write(f"**Title:** {movie['title']}")
-        st.write(f"**Summary:** {movie['summary']}")
-
-        st.subheader("🎭 Actual Genres")
-        st.write(", ".join(movie['genres']))
-
-        # Prepare the LLM prompt
-        prompt = f"""
-        You are a movie expert. Based on the following movie summary, classify the movie into genres.
-        **Only output the genre names**, separated by commas.
-
-        Movie Summary:
-        {movie['summary']}
-        """
-
-        # Call Ollama to classify the movie
-        with st.spinner("Analyzing movie..."):
-            response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-            predicted_genres = response['message']['content']
-
-        # Display LLM Prediction
-        st.subheader("🤖 LLM-Predicted Genres")
-        st.write(predicted_genres)
-
 

@@ -284,42 +284,6 @@ class MovieAnalysis:
 
         return result
 
-    def get_random_movie(self):
-        """
-        Selects a random movie from the dataset and returns its title, summary, and genres.
-
-        Returns:
-        --------
-        dict: {'title': str, 'summary': str, 'genres': list}
-        """
-        # Pick a random index
-        movie_idx = random.randint(0, len(self.movie_summaries) - 1)
-
-        # Extract movie details
-        movie_id = self.movie_summaries.iloc[movie_idx]['Wikipedia movie ID']
-        movie_summary = self.movie_summaries.iloc[movie_idx]['Plot summary']
-        movie_title = self.movie_data.loc[self.movie_data['Wikipedia movie ID'] == movie_id, 'Movie name'].values
-
-        # Get the movie genres (stored as a dictionary)
-        movie_genres = self.movie_data.loc[
-            self.movie_data['Wikipedia movie ID'] == movie_id, 'Movie genres'
-        ].values
-
-        # Extract the genre list
-        if len(movie_genres) > 0:
-            try:
-                movie_genres = list(ast.literal_eval(movie_genres[0]).values())  # Convert from dict to list
-            except (ValueError, SyntaxError):
-                movie_genres = ["Unknown"]
-        else:
-            movie_genres = ["Unknown"]
-
-        return {
-            "title": movie_title[0] if len(movie_title) > 0 else "Unknown",
-            "summary": movie_summary,
-            "genres": movie_genres
-        }
-
 
 if __name__ == '__main__':
     test = MovieAnalysis()
