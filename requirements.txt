@@ -1,8 +1,7 @@
-streamlit
-matplotlib
-pandas
-urllib3
-ast
-random
-re
-ollama
+streamlit==1.43.2
+matplotlib==3.10.1
+pandas==2.2.3
+numpy==2.2.3
+urllib3==2.3.0
+requests==2.32.3
+ollama==0.4.7
