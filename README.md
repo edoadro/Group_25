@@ -1,14 +1,15 @@
 # Group_25
+
 Group 25's repository for the Advanced Programming course at Nova SBE 2025
 
-The group is composed by: 
+The group is composed by:
 
-Edoardo Beccari (67990@novasbe.pt) \
-Bernardo Arcão (68204@novasbe.pt) \
-Ricardo Ferreira (39175@novasbe.pt) \
-Tancredi Di Grande (61700@novasbe.pt)
+[Edoardo Beccari] - [*University e-mail*](67990@novasbe.pt) \
+[Bernardo Arcão] - [*University e-mail*](68204@novasbe.pt) \
+[Ricardo Ferreira] - [*University e-mail*](39175@novasbe.pt) \
+[Tancredi Di Grande] - [*University e-mail*](61700@novasbe.pt)
 
-# Movie Data Analysis App
+## Movie Data Analysis App
 
 This project analyzes movie data using Python and Streamlit, leveraging the CMU Movie Corpus dataset. It provides visual insights into movie genres, actor distributions, and AI-powered genre classification.
 
@@ -18,7 +19,20 @@ This project analyzes movie data using Python and Streamlit, leveraging the CMU 
 
 Follow these steps to set up and run the project on your local machine.
 
+### Install Ollama and download the LLM model
+
+Make sure you install Ollama from the [official website](https://ollama.com/download/)
+
+After installing Ollama, download the LLM model you want to use with the app.
+
+```sh
+ollama pull mistral
+```
+
+**N.B.:** By default the app uses `mistral` for genre classification. If you wish to use a different model you can specify it in the configuration file. [View config.json](config.json)
+
 ### Clone the Repository
+
 Clone this repository to your local machine:
 
 ```sh
@@ -30,18 +44,10 @@ cd Group_25
 
 Creating a virtual environment ensures that dependencies do not interfere with other Python projects on your system.
 
-#### **For Windows (Command Prompt or PowerShell)**
-
 ```sh
-python -m venv venv
-venv\Scripts\activate
-```
-
-#### **For macOS/Linux**
-
-```sh
-python3 -m venv venv
-source venv/bin/activate
+python -m venv myvenv
+source myvenv/bin/activate  # On macOS/Linux
+myvenv\Scripts\activate     # On Windows
 ```
 
 ### Install Project Dependencies
@@ -49,6 +55,16 @@ source venv/bin/activate
 ```sh
 pip install -r requirements.txt
 ```
+
+### Run Ollama
+
+Make sure to run Ollama
+
+```sh
+ollama serve # Start Ollama (must remain running)
+```
+
+**N.B.:** Keep the terminal window open to ensure Ollama remains active. The app will fail without Ollama runnig. Execute the following shell commands in a new window.
 
 ### Run the Streamlit App
 

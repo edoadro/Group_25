@@ -3,6 +3,15 @@ from MovieAnalysis import MovieAnalysis
 import streamlit as st
 import matplotlib.pyplot as plt
 import ollama
+import json
+
+# Load configuration
+def load_config():
+    with open("config.json", "r") as file:
+        return json.load(file)
+
+config = load_config()
+MODEL_NAME = config["ollama"]["model"]  # Get model name for Ollama to run the AI model
 
 def jaccard_similarity(set1, set2):
     """Compute Jaccard similarity between two sets"""
@@ -139,18 +148,21 @@ elif page == "Chronological Info":
 # AI Classification Page
 elif page == "AI Classification":
     st.header("🤖 AI-Based Movie Genre Classification")
+    st.sidebar.markdown(f"**LLM Model in Use:** `{MODEL_NAME}` (it can be configured in `config.json`)")
 
     # Button to shuffle a movie
     if st.button("🔀 Shuffle Movie"):
         movie = analysis.get_random_movie()
+        
+        #box1
+        with st.container(border=True):
+            st.markdown(f"### 🎥🎬Chosen Movie: *{movie['title']}* 🎥🎬")
+            st.expander("Movie Summary - 𝘤𝘭𝘪𝘤𝘬 𝘵𝘰 𝘦𝘹𝘱𝘢𝘯𝘥").write(movie['summary'])
 
-        # Display movie details
-        st.markdown(f"### 🎥🎬Chosen Movie: *{movie['title']}* 🎥🎬")
-        with st.expander("Movie Summary - 𝘤𝘭𝘪𝘤𝘬 𝘵𝘰 𝘦𝘹𝘱𝘢𝘯𝘥"):
-            st.write(movie['summary'])
-
-        st.markdown("#### 🎭 Actual Genres")
-        st.write(", ".join(movie['genres']))
+        # box2
+        with st.container(border=True):
+            st.markdown("### 🎭 Actual Genres")
+            st.write(", ".join(movie['genres']))
 
         # Prepare the LLM prompt
         prompt = f"""
@@ -161,66 +173,72 @@ elif page == "AI Classification":
         {movie['summary']}
         """
 
-        # Call Ollama to classify the movie
-        with st.spinner("Analyzing movie..."):
-            try:
-                response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-                predicted_genres = response['message']['content']
-            except Exception as e:
-                st.error(f"Error communicating with the LLM: {e}")
-                predicted_genres = ""
 
-        # Clean and process the LLM output
-        predicted_genres_list = [genre.strip() for genre in predicted_genres.split(",") if genre.strip()]
-        actual_genres_set = [set(genre.lower().split()) for genre in movie['genres']]
-        llm_genres_set = [set(genre.lower().split()) for genre in predicted_genres_list]
-
-        # Display LLM Prediction
-        st.subheader("🤖 LLM-Predicted Genres")
-        st.write(", ".join(predicted_genres_list) if predicted_genres_list else "No genres identified.")
-
-        # Show whether the genres match
-        st.markdown("### Evaluation of genre prediction")
-        
-        if not actual_genres_set:
-            st.warning("⚠️ No actual genres available for comparison. Skipping evaluation.")
-        else:
-            st.markdown("#### Jaccard Similarity based Evaluation")
+        # box3
+        with st.container(border=True):
+            st.markdown("### 🤖 LLM-Predicted Genres")
             
-            threshold = 0.5  # Define a similarity threshold
-            markdown_table = "| Predicted Genre | Match Found? | Highest Jaccard Similarity |\n"
-            markdown_table += "|----------------|-------------|----------------------------|\n"
-            matches_count = 0
-
-            for pred in llm_genres_set:
-                pred_str = " ".join(pred)
-                max_similarity = max(jaccard_similarity(pred, act) for act in actual_genres_set)
-                match_status = "✅ Yes" if max_similarity >= threshold else "❌ No"
-                markdown_table += f"| {pred_str} | {match_status} | {max_similarity:.2f} |\n"
-                matches_count += 1 if max_similarity >= threshold else 0
-
-            success_rate = matches_count / len(llm_genres_set)
-
-            if success_rate >= 0.5:
-                st.success(f"✅ At least half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
-            else:
-                st.error(f"❌ Less then half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
-            
-            st.markdown("#### 🤖 LLM-Based Prediction Comparison")
-            
-            evaluation_messages=[
-                {"role": "system", "content": "You are a movie expert. You are in charge to evaluate the perfomance of an AI model that predicts movie genres."},
-                {"role": "user", "content": "Compare the model predictions with the actual genres and explain if they match well:\n\n"
-                                            f"Model Prediction: [{', '.join(predicted_genres_list)}]\n"
-                                            f"Actual Genres: [{', '.join(movie['genres'])}]\n"
-                                            f"The predictions are for the movie: {movie['title']}\n"
-                                            "Be very concise and clear in your evaluation."}
-            ]
-            
-            with st.spinner("AI model is thinking..."):
+            # Call Ollama to classify the movie
+            with st.spinner("Analyzing movie..."):
                 try:
-                    response = ollama.chat(model='mistral', messages=evaluation_messages)
-                    st.markdown(response['message']['content'])
+                    response = ollama.chat(model=MODEL_NAME, messages=[{"role": "user", "content": prompt}])
+                    predicted_genres = response['message']['content']
                 except Exception as e:
                     st.error(f"Error communicating with the LLM: {e}")
+                    predicted_genres = ""
+
+            # Clean and process the LLM output
+            predicted_genres_list = [genre.strip() for genre in predicted_genres.split(",") if genre.strip()]
+            actual_genres_set = [set(genre.lower().split()) for genre in movie['genres']]
+            llm_genres_set = [set(genre.lower().split()) for genre in predicted_genres_list]
+            st.write(", ".join(predicted_genres_list) if predicted_genres_list else "No genres identified.")
+
+        # box4 evalation
+        with st.container(border=True):
+            st.markdown("### Evaluation of genre prediction")
+            
+            if not actual_genres_set:
+                st.warning("⚠️ No actual genres available for comparison. Skipping evaluation. ☹️\nPlease shuffle another movie.")
+            else:
+                st.markdown("#### Jaccard Similarity based Evaluation")
+                
+                threshold = 0.5  # Define a similarity threshold
+                markdown_table = "| Predicted Genre | Match Found? | Highest Jaccard Similarity |\n"
+                markdown_table += "|----------------|-------------|----------------------------|\n"
+                matches_count = 0
+
+                # Evaluate each predicted genre
+                for pred in llm_genres_set:
+                    pred_str = " ".join(pred)
+                    max_similarity = max(jaccard_similarity(pred, act) for act in actual_genres_set)
+                    match_status = "✅ Yes" if max_similarity >= threshold else "❌ No"
+                    markdown_table += f"| {pred_str} | {match_status} | {max_similarity:.2f} |\n"
+                    matches_count += 1 if max_similarity >= threshold else 0
+
+                success_rate = matches_count / len(llm_genres_set)
+
+                # Evaluation results
+                if success_rate >= 0.5:
+                    st.success(f"✅ At least half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
+                else:
+                    st.error(f"❌ Less then half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
+                
+                
+                st.markdown("#### 🤖 LLM-Based Prediction Comparison")
+                
+                evaluation_messages=[
+                    {"role": "system", "content": "You are a movie expert. You are in charge to evaluate the perfomance of an AI model that predicts movie genres."},
+                    {"role": "user", "content": "Compare the model predictions with the actual genres and explain if they match well:\n\n"
+                                                f"Model Prediction: [{', '.join(predicted_genres_list)}]\n"
+                                                f"Actual Genres: [{', '.join(movie['genres'])}]\n"
+                                                f"The predictions are for the movie: {movie['title']}\n"
+                                                "Be very concise and clear in your evaluation."}
+                ]
+                
+                with st.spinner("AI model is thinking..."):
+                    try:
+                        response = ollama.chat(model=MODEL_NAME, messages=evaluation_messages)
+                        st.markdown(response['message']['content'])
+                    except Exception as e:
+                        st.error(f"Error communicating with the LLM: {e}")
 
