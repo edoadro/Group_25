@@ -1,9 +1,14 @@
 import sys
-sys.path.append("..")  # Adds higher directory to python modules path.
 from MovieAnalysis import MovieAnalysis
 import streamlit as st
 import matplotlib.pyplot as plt
 import ollama
+
+def jaccard_similarity(set1, set2):
+    """Compute Jaccard similarity between two sets"""
+    intersection = set1.intersection(set2)
+    union = set1.union(set2)
+    return len(intersection) / len(union) if union else 0
 
 # Initialize the MovieAnalysis instance
 analysis = MovieAnalysis()
@@ -18,7 +23,10 @@ if page == "Main Analysis":
         "This app provides an analysis of the [CMU movie corpus](https://www.cmu.edu/) movie dataset. "
         "[Dataset Link](http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz)."
     )
-    st.markdown("The dataset contains information about movies, characters, and actors. The analysis includes histograms for movie types, actor counts per movie, and actor heights.")
+    st.markdown(
+        "The dataset contains information about movies, characters, and actors."
+        "The analysis includes histograms for movie types, actor counts per movie, and actor heights."
+    )
 
     # 1. Histogram for movie types
     st.subheader("Movie Types Histogram")
@@ -130,18 +138,18 @@ elif page == "Chronological Info":
 
 # AI Classification Page
 elif page == "AI Classification":
-    st.title("🤖 AI-Based Movie Genre Classification")
+    st.header("🤖 AI-Based Movie Genre Classification")
 
     # Button to shuffle a movie
     if st.button("🔀 Shuffle Movie"):
         movie = analysis.get_random_movie()
 
         # Display movie details
-        st.subheader("📖 Movie Title & Summary")
-        st.write(f"**Title:** {movie['title']}")
-        st.write(f"**Summary:** {movie['summary']}")
+        st.markdown(f"### 🎥🎬Chosen Movie: *{movie['title']}* 🎥🎬")
+        with st.expander("Movie Summary - 𝘤𝘭𝘪𝘤𝘬 𝘵𝘰 𝘦𝘹𝘱𝘢𝘯𝘥"):
+            st.write(movie['summary'])
 
-        st.subheader("🎭 Actual Genres")
+        st.markdown("#### 🎭 Actual Genres")
         st.write(", ".join(movie['genres']))
 
         # Prepare the LLM prompt
@@ -164,21 +172,55 @@ elif page == "AI Classification":
 
         # Clean and process the LLM output
         predicted_genres_list = [genre.strip() for genre in predicted_genres.split(",") if genre.strip()]
-        actual_genres_set = set(movie['genres'])
-        llm_genres_set = set(predicted_genres_list)
-
-        # Compare with actual genres
-        is_match = llm_genres_set.issubset(actual_genres_set)
+        actual_genres_set = [set(genre.lower().split()) for genre in movie['genres']]
+        llm_genres_set = [set(genre.lower().split()) for genre in predicted_genres_list]
 
         # Display LLM Prediction
         st.subheader("🤖 LLM-Predicted Genres")
         st.write(", ".join(predicted_genres_list) if predicted_genres_list else "No genres identified.")
 
         # Show whether the genres match
-        st.subheader("✅ Match Check")
-        if is_match:
-            st.success("The LLM's predicted genres match the database genres!")
+        st.markdown("### Evaluation of genre prediction")
+        
+        if not actual_genres_set:
+            st.warning("⚠️ No actual genres available for comparison. Skipping evaluation.")
         else:
-            st.error("The LLM's predicted genres do NOT match the database genres!")
+            st.markdown("#### Jaccard Similarity based Evaluation")
+            
+            threshold = 0.5  # Define a similarity threshold
+            markdown_table = "| Predicted Genre | Match Found? | Highest Jaccard Similarity |\n"
+            markdown_table += "|----------------|-------------|----------------------------|\n"
+            matches_count = 0
 
+            for pred in llm_genres_set:
+                pred_str = " ".join(pred)
+                max_similarity = max(jaccard_similarity(pred, act) for act in actual_genres_set)
+                match_status = "✅ Yes" if max_similarity >= threshold else "❌ No"
+                markdown_table += f"| {pred_str} | {match_status} | {max_similarity:.2f} |\n"
+                matches_count += 1 if max_similarity >= threshold else 0
+
+            success_rate = matches_count / len(llm_genres_set)
+
+            if success_rate >= 0.5:
+                st.success(f"✅ At least half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
+            else:
+                st.error(f"❌ Less then half of the model's predictions were correct ({matches_count} out of {len(llm_genres_set)})\n" + markdown_table)
+            
+            st.markdown("#### 🤖 LLM-Based Prediction Comparison")
+            
+            evaluation_messages=[
+                {"role": "system", "content": "You are a movie expert. You are in charge to evaluate the perfomance of an AI model that predicts movie genres."},
+                {"role": "user", "content": "Compare the model predictions with the actual genres and explain if they match well:\n\n"
+                                            f"Model Prediction: [{', '.join(predicted_genres_list)}]\n"
+                                            f"Actual Genres: [{', '.join(movie['genres'])}]\n"
+                                            f"The predictions are for the movie: {movie['title']}\n"
+                                            "Be very concise and clear in your evaluation."}
+            ]
+            
+            with st.spinner("AI model is thinking..."):
+                try:
+                    response = ollama.chat(model='mistral', messages=evaluation_messages)
+                    st.markdown(response['message']['content'])
+                except Exception as e:
+                    st.error(f"Error communicating with the LLM: {e}")
 
