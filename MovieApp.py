@@ -1,10 +1,9 @@
 import sys
-sys.path.append("..") # Adds higher directory to python modules path.
+sys.path.append("..")  # Adds higher directory to python modules path.
 from MovieAnalysis import MovieAnalysis
 import streamlit as st
 import matplotlib.pyplot as plt
 import ollama
-
 
 # Initialize the MovieAnalysis instance
 analysis = MovieAnalysis()
@@ -12,10 +11,8 @@ analysis = MovieAnalysis()
 st.title("Movie Data Analysis - Group_25")
 page = st.sidebar.selectbox("Choose a page", ["Main Analysis", "Chronological Info", "AI Classification"])
 
-
 # Main Analysis Page
 if page == "Main Analysis":
-    
     st.markdown(
         "## Main Analysis\n"
         "This app provides an analysis of the [CMU movie corpus](https://www.cmu.edu/) movie dataset. "
@@ -78,9 +75,7 @@ elif page == "Chronological Info":
     st.subheader("Movie Releases Over Time")
 
     # Genre Selection
-    
-    available_genres = ['Drama', 'Comedy', 'Romance Film', 'Black-and-white', 'Action', 'Thriller', 'Short Film', 'World cinema', 'Crime Fiction', 'Indie',]
-    
+    available_genres = ['Drama', 'Comedy', 'Romance Film', 'Black-and-white', 'Action', 'Thriller', 'Short Film', 'World cinema', 'Crime Fiction', 'Indie']
     available_genres.sort()
     selected_genre = st.selectbox("Select Genre", available_genres)
 
@@ -133,7 +128,7 @@ elif page == "Chronological Info":
 
         st.pyplot(fig5)
 
-
+# AI Classification Page
 elif page == "AI Classification":
     st.title("🤖 AI-Based Movie Genre Classification")
 
@@ -151,8 +146,8 @@ elif page == "AI Classification":
 
         # Prepare the LLM prompt
         prompt = f"""
-        You are a movie expert. Based on the following movie summary, classify the movie into genres.
-        **Only output the genre names**, separated by commas.
+        You are a movie classification AI. Given a movie summary, return only the genres that match the movie.
+        Output only a comma-separated list of genres. Do not add extra words.
 
         Movie Summary:
         {movie['summary']}
@@ -160,11 +155,30 @@ elif page == "AI Classification":
 
         # Call Ollama to classify the movie
         with st.spinner("Analyzing movie..."):
-            response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-            predicted_genres = response['message']['content']
+            try:
+                response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
+                predicted_genres = response['message']['content']
+            except Exception as e:
+                st.error(f"Error communicating with the LLM: {e}")
+                predicted_genres = ""
+
+        # Clean and process the LLM output
+        predicted_genres_list = [genre.strip() for genre in predicted_genres.split(",") if genre.strip()]
+        actual_genres_set = set(movie['genres'])
+        llm_genres_set = set(predicted_genres_list)
+
+        # Compare with actual genres
+        is_match = llm_genres_set.issubset(actual_genres_set)
 
         # Display LLM Prediction
         st.subheader("🤖 LLM-Predicted Genres")
-        st.write(predicted_genres)
+        st.write(", ".join(predicted_genres_list) if predicted_genres_list else "No genres identified.")
+
+        # Show whether the genres match
+        st.subheader("✅ Match Check")
+        if is_match:
+            st.success("The LLM's predicted genres match the database genres!")
+        else:
+            st.error("The LLM's predicted genres do NOT match the database genres!")
 
 
