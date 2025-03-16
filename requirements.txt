@@ -1,0 +1,8 @@
+streamlit
+matplotlib
+pandas
+urllib3
+ast
+random
+re
+ollama
