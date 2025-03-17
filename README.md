@@ -4,10 +4,10 @@ Group 25's repository for the Advanced Programming course at Nova SBE 2025
 
 The group is composed by:
 
-[Edoardo Beccari] - [*University e-mail*](67990@novasbe.pt) \
-[Bernardo Arcão] - [*University e-mail*](68204@novasbe.pt) \
-[Ricardo Ferreira] - [*University e-mail*](39175@novasbe.pt) \
-[Tancredi Di Grande] - [*University e-mail*](61700@novasbe.pt)
+[Edoardo Beccari] - (67990@novasbe.pt) \
+[Bernardo Arcão] - (68204@novasbe.pt) \
+[Ricardo Ferreira] - (39175@novasbe.pt) \
+[Tancredi Di Grande] - (61700@novasbe.pt)
 
 ## Movie Data Analysis App
 
